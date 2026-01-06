@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f1f5f9;
+            --text-color: #1e293b;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            background-color: var(--background-color);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100vh;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            width: 300px;
+        }
+
+        .search-bar button {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Table Styles */
+        .table-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            color: var(--text-color);
+        }
+
+        .add-btn {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status.active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .status.inactive {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn.edit {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .btn.delete {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--text-color);
+        }
+
+        .close {
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+        }
+
+        .modal-footer {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .modal-footer button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal-footer .cancel {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .modal-footer .save {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1001;
+            display: none;
+        }
+
+        .notification.success {
+            background-color: #10b981;
+        }
+
+        .notification.error {
+            background-color: #ef4444;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                StudentMS
+            </div>
+            <div class="nav-item active" onclick="navigateToSection('dashboard')">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </div>
+            <div class="nav-item" onclick="navigateToSection('students')">
+                <i class="fas fa-users"></i>
+                Students
+            </div>
+            <div class="nav-item" onclick="navigateToSection('courses')">
+                <i class="fas fa-book"></i>
+                Courses
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section active">
+                <div class="header">
+                    <h1>Dashboard</h1>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search students..." id="searchInput">
+                        <button onclick="searchStudents()"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+
+                <div class="stats-grid" id="statsGrid">
+                    <!-- Stats will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Students Section -->
+            <div id="students" class="section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Students</h2>
+                        <button class="add-btn" onclick="openStudentModal()"><i class="fas fa-plus"></i> Add Student</button>
+                    </div>
+                    <table id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Course</th>
+                                <th>Enrollment Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Students will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Courses Section -->
+            <div id="courses" class="section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Courses</h2>
+                        <button class="add-btn" onclick="openCourseModal()"><i class="fas fa-plus"></i> Add Course</button>
+                    </div>
+                    <table id="coursesTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Duration (hours)</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coursesTableBody">
+                            <!-- Courses will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="studentModalTitle">Add Student</h2>
+                <span class="close" onclick="closeStudentModal()">&times;</span>
+            </div>
+            <form id="studentForm">
+                <div class="form-group">
+                    <label for="studentName">Name</label>
+                    <input type="text" id="studentName" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentEmail">Email</label>
+                    <input type="email" id="studentEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentCourse">Course</label>
+                    <select id="studentCourse" required>
+                        <!-- Courses will be loaded here -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="studentDate">Enrollment Date</label>
+                    <input type="date" id="studentDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentStatus">Status</label>
+                    <select id="studentStatus" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="cancel" onclick="closeStudentModal()">Cancel</button>
+                    <button type="submit" class="save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Course Modal -->
+    <div id="courseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="courseModalTitle">Add Course</h2>
+                <span class="close" onclick="closeCourseModal()">&times;</span>
+            </div>
+            <form id="courseForm">
+                <div class="form-group">
+                    <label for="courseName">Name</label>
+                    <input type="text" id="courseName" required>
+                </div>
+                <div class="form-group">
+                    <label for="courseDescription">Description</label>
+                    <textarea id="courseDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="courseDuration">Duration (hours)</label>
+                    <input type="number" id="courseDuration" required>
+                </div>
+                <div class="form-group">
+                    <label for="courseStatus">Status</label>
+                    <select id="courseStatus" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="cancel" onclick="closeCourseModal()">Cancel</button>
+                    <button type="submit" class="save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const API_BASE_URL = "http://localhost:3000";
+        let courses = [];
+        let students = [];
+        let currentStudentId = null;
+        let currentCourseId = null;
+
+        // Navigation
+        function navigateToSection(sectionName) {
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+
+            // Show selected section
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            document.getElementById(sectionName).classList.add('active');
+
+            // Load data for the section
+            checkAndLoadData();
+        }
+
+        // Data loading
+        async function checkAndLoadData() {
+            const activeSection = document.querySelector('.section.active').id;
+
+            if (activeSection === 'dashboard' || activeSection === 'students') {
+                await loadCourses();
+                await loadStudents();
+                await loadStats();
+            } else if (activeSection === 'courses') {
+                await loadCourses();
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`);
+                if (!response.ok) throw new Error("Failed to fetch stats");
+
+                const stats = await response.json();
+                renderStats(stats);
+            } catch (error) {
+                console.error("Error loading stats:", error);
+                showNotification("Error loading dashboard stats", "error");
+            }
+        }
+
+        function renderStats(stats) {
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <h3>Total Students</h3>
+                    <div class="number">${stats.totalStudents}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Students</h3>
+                    <div class="number">${stats.activeStudents}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Courses</h3>
+                    <div class="number">${stats.totalCourses}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Success Rate</h3>
+                    <div class="number">${stats.successRate}%</div>
+                </div>
+            `;
+        }
+
+        async function loadCourses() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/courses`);
+                if (!response.ok) throw new Error("Failed to fetch courses");
+
+                courses = await response.json();
+                updateCourseDropdown(courses);
+                renderCourseTable(courses);
+                return courses;
+            } catch (error) {
+                console.error("Error loading courses:", error);
+                showNotification("Error loading courses", "error");
+                courses = [];
+                renderCourseTable([]);
+            }
+        }
+
+        function updateCourseDropdown(courses) {
+            const dropdown = document.getElementById('studentCourse');
+            dropdown.innerHTML = '<option value="">Select a course</option>';
+            courses.forEach(course => {
+                if (course.status === 'active') {
+                    dropdown.innerHTML += `<option value="${course._id}">${course.name}</option>`;
+                }
+            });
+        }
+
+        function renderCourseTable(courses) {
+            const tbody = document.getElementById('coursesTableBody');
+            tbody.innerHTML = '';
+
+            courses.forEach(course => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${course.name}</td>
+                    <td>${course.description}</td>
+                    <td>${course.duration}</td>
+                    <td><span class="status ${course.status}">${course.status}</span></td>
+                    <td class="actions">
+                        <button class="btn edit" onclick="editCourse('${course._id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn delete" onclick="deleteCourse('${course._id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function loadStudents() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/students`);
+                if (!response.ok) throw new Error("Failed to fetch students");
+
+                students = await response.json();
+                renderStudentTable(students);
+                return students;
+            } catch (error) {
+                console.error("Error loading students:", error);
+                showNotification("Error loading students", "error");
+                students = [];
+                renderStudentTable([]);
+            }
+        }
+
+        function renderStudentTable(students) {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+
+            students.forEach(student => {
+                const courseName = courses.find(c => c._id === student.course)?.name || 'Unknown';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td>${courseName}</td>
+                    <td>${new Date(student.enrollmentDate).toLocaleDateString()}</td>
+                    <td><span class="status ${student.status}">${student.status}</span></td>
+                    <td class="actions">
+                        <button class="btn edit" onclick="editStudent('${student._id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn delete" onclick="deleteStudent('${student._id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function searchStudents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (!searchTerm) {
+                renderStudentTable(students);
+                return;
+            }
+
+            const filteredStudents = students.filter(student =>
+                student.name.toLowerCase().includes(searchTerm) ||
+                student.email.toLowerCase().includes(searchTerm) ||
+                student.course.toLowerCase().includes(searchTerm)
+            );
+            renderStudentTable(filteredStudents);
+        }
+
+        // Student CRUD operations
+        function openStudentModal(studentId = null) {
+            currentStudentId = studentId;
+            const modal = document.getElementById('studentModal');
+            const form = document.getElementById('studentForm');
+            const title = document.getElementById('studentModalTitle');
+
+            if (studentId) {
+                title.textContent = 'Edit Student';
+                const student = students.find(s => s._id === studentId);
+                if (student) {
+                    document.getElementById('studentName').value = student.name;
+                    document.getElementById('studentEmail').value = student.email;
+                    document.getElementById('studentCourse').value = student.course;
+                    document.getElementById('studentDate').value = new Date(student.enrollmentDate).toISOString().split('T')[0];
+                    document.getElementById('studentStatus').value = student.status;
+                }
+            } else {
+                title.textContent = 'Add Student';
+                form.reset();
+                document.getElementById('studentDate').value = new Date().toISOString().split('T')[0];
+            }
+
+            modal.style.display = 'block';
+        }
+
+        function closeStudentModal() {
+            document.getElementById('studentModal').style.display = 'none';
+            currentStudentId = null;
+        }
+
+        document.getElementById('studentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const studentData = {
+                name: document.getElementById('studentName').value,
+                email: document.getElementById('studentEmail').value,
+                course: document.getElementById('studentCourse').value,
+                enrollmentDate: document.getElementById('studentDate').value,
+                status: document.getElementById('studentStatus').value
+            };
+
+            try {
+                let response;
+                if (currentStudentId) {
+                    response = await fetch(`${API_BASE_URL}/api/students/${currentStudentId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(studentData)
+                    });
+                } else {
+                    response = await fetch(`${API_BASE_URL}/api/students`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(studentData)
+                    });
+                }
+
+                if (!response.ok) throw new Error("Failed to save student");
+
+                await loadStudents();
+                await loadStats();
+                closeStudentModal();
+                showNotification(`Student ${currentStudentId ? 'updated' : 'added'} successfully`, "success");
+            } catch (error) {
+                console.error("Error saving student:", error);
+                showNotification("Error saving student", "error");
+            }
+        });
+
+        async function editStudent(studentId) {
+            openStudentModal(studentId);
+        }
+
+        async function deleteStudent(studentId) {
+            if (!confirm('Are you sure you want to delete this student?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/students/${studentId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error("Failed to delete student");
+
+                await loadStudents();
+                await loadStats();
+                showNotification("Student deleted successfully", "success");
+            } catch (error) {
+                console.error("Error deleting student:", error);
+                showNotification("Error deleting student", "error");
+            }
+        }
+
+        // Course CRUD operations
+        function openCourseModal(courseId = null) {
+            currentCourseId = courseId;
+            const modal = document.getElementById('courseModal');
+            const form = document.getElementById('courseForm');
+            const title = document.getElementById('courseModalTitle');
+
+            if (courseId) {
+                title.textContent = 'Edit Course';
+                const course = courses.find(c => c._id === courseId);
+                if (course) {
+                    document.getElementById('courseName').value = course.name;
+                    document.getElementById('courseDescription').value = course.description;
+                    document.getElementById('courseDuration').value = course.duration;
+                    document.getElementById('courseStatus').value = course.status;
+                }
+            } else {
+                title.textContent = 'Add Course';
+                form.reset();
+            }
+
+            modal.style.display = 'block';
+        }
+
+        function closeCourseModal() {
+            document.getElementById('courseModal').style.display = 'none';
+            currentCourseId = null;
+        }
+
+        document.getElementById('courseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const courseData = {
+                name: document.getElementById('courseName').value,
+                description: document.getElementById('courseDescription').value,
+                duration: parseInt(document.getElementById('courseDuration').value),
+                status: document.getElementById('courseStatus').value
+            };
+
+            try {
+                let response;
+                if (currentCourseId) {
+                    response = await fetch(`${API_BASE_URL}/api/courses/${currentCourseId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(courseData)
+                    });
+                } else {
+                    response = await fetch(`${API_BASE_URL}/api/courses`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(courseData)
+                    });
+                }
+
+                if (!response.ok) throw new Error("Failed to save course");
+
+                await loadCourses();
+                await loadStats();
+                closeCourseModal();
+                showNotification(`Course ${currentCourseId ? 'updated' : 'added'} successfully`, "success");
+            } catch (error) {
+                console.error("Error saving course:", error);
+                showNotification("Error saving course", "error");
+            }
+        });
+
+        async function editCourse(courseId) {
+            openCourseModal(courseId);
+        }
+
+        async function deleteCourse(courseId) {
+            if (!confirm('Are you sure you want to delete this course?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/courses/${courseId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error("Failed to delete course");
+
+                await loadCourses();
+                await loadStats();
+                showNotification("Course deleted successfully", "success");
+            } catch (error) {
+                console.error("Error deleting course:", error);
+                showNotification("Error deleting course", "error");
+            }
+        }
+
+        // Utility functions
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const studentModal = document.getElementById('studentModal');
+            const courseModal = document.getElementById('courseModal');
+
+            if (event.target === studentModal) {
+                closeStudentModal();
+            }
+            if (event.target === courseModal) {
+                closeCourseModal();
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAndLoadData();
+        });
+    </script>
+</body>
+</html>
